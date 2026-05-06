@@ -8,7 +8,7 @@
     "server": "node app.js",
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "check": "node --check app.js && vite build"
+    "check": "node --check app.js && node --check \"api/[...path].js\" && vite build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
