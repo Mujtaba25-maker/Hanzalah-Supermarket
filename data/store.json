@@ -1,0 +1,128 @@
+{
+  "products": [
+    {
+      "id": "p_1001",
+      "sku": "MILK-1L",
+      "barcode": "MILK-1L",
+      "name": "Fresh Milk 1L",
+      "category": "Groceries",
+      "stock": 41,
+      "minStock": 12,
+      "cost": 0.85,
+      "price": 1.25,
+      "supplierId": "s_1001",
+      "updatedAt": "2026-05-06T14:08:26.965Z"
+    },
+    {
+      "id": "p_1002",
+      "sku": "RICE-5KG",
+      "barcode": "RICE-5KG",
+      "name": "Basmati Rice 5kg",
+      "category": "Groceries",
+      "stock": 3,
+      "minStock": 8,
+      "cost": 7.4,
+      "price": 10.5,
+      "supplierId": "s_1002",
+      "updatedAt": "2026-05-06T15:06:04.883Z"
+    },
+    {
+      "id": "p_1003",
+      "sku": "SOAP-125",
+      "barcode": "SOAP-125",
+      "name": "Hand Soap 125g",
+      "category": "Household",
+      "stock": 9,
+      "minStock": 15,
+      "cost": 0.42,
+      "price": 0.75,
+      "supplierId": "s_1001",
+      "updatedAt": "2026-05-06T14:02:41.014Z"
+    },
+    {
+      "id": "p_mou72x0x5oh1u",
+      "sku": "Sanich",
+      "barcode": "Sanich",
+      "name": "Juse",
+      "category": "juse",
+      "stock": 860,
+      "minStock": 10,
+      "cost": 79,
+      "price": 90,
+      "supplierId": "s_1001",
+      "updatedAt": "2026-05-06T15:13:04.554Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "c_1001",
+      "name": "Walk-in Customer",
+      "phone": "",
+      "email": "",
+      "address": ""
+    },
+    {
+      "id": "c_1002",
+      "name": "Ahmad Shah",
+      "phone": "0700000000",
+      "email": "",
+      "address": "Kabul"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "s_1001",
+      "name": "City Wholesale",
+      "phone": "0790000000",
+      "email": "sales@city.example",
+      "address": "Main market"
+    },
+    {
+      "id": "s_1002",
+      "name": "Golden Grain Co.",
+      "phone": "0780000000",
+      "email": "orders@golden.example",
+      "address": "Warehouse district"
+    }
+  ],
+  "sales": [
+    {
+      "id": "sale_mou4udedct965",
+      "productId": "p_1001",
+      "productName": "Fresh Milk 1L",
+      "customerId": "",
+      "quantity": 1,
+      "unitPrice": 1.25,
+      "total": 1.25,
+      "profit": 0.4,
+      "paymentMethod": "Cash",
+      "createdAt": "2026-05-06T14:08:26.965Z"
+    },
+    {
+      "id": "sale_mou6whjn2r30o",
+      "productId": "p_1002",
+      "productName": "Basmati Rice 5kg",
+      "customerId": "",
+      "quantity": 15,
+      "unitPrice": 10.5,
+      "total": 157.5,
+      "profit": 46.49999999999999,
+      "paymentMethod": "Cash",
+      "createdAt": "2026-05-06T15:06:04.883Z"
+    },
+    {
+      "id": "sale_mou75hd6tlecx",
+      "productId": "p_mou72x0x5oh1u",
+      "productName": "Juse",
+      "customerId": "",
+      "quantity": 340,
+      "unitPrice": 90,
+      "total": 30600,
+      "profit": 3740,
+      "paymentMethod": "Cash",
+      "createdAt": "2026-05-06T15:13:04.554Z"
+    }
+  ],
+  "orders": [],
+  "purchases": []
+}

@@ -1,0 +1,32 @@
+{
+  "name": "hanzalah-supermarket",
+  "version": "1.0.0",
+  "description": "Hanzalah Supermarket management dashboard for inventory, sales, orders, and customers.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "server": "node app.js",
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "check": "node --check app.js && vite build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.6.0",
+    "react-router-dom": "^7.15.0",
+    "recharts": "^3.8.1",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.7"
+  },
+  "keywords": [
+    "store",
+    "inventory",
+    "sales"
+  ],
+  "author": "",
+  "license": "MIT"
+}
