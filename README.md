@@ -11,8 +11,8 @@ Modern store management dashboard for inventory, sales, orders, customers, analy
 - Order management with filters, search, pagination, and barcode-based order items
 - Customer management table with search and sorting
 - Responsive React + Tailwind CSS admin layout
-- Local JSON-backed API for development
-- Vercel-ready serverless API routes for demo deployment
+- MongoDB Atlas-backed API for real persistent storage
+- Vercel-ready serverless API routes
 
 ## Tech Stack
 
@@ -23,6 +23,7 @@ Modern store management dashboard for inventory, sales, orders, customers, analy
 - React Icons
 - Recharts
 - Node.js API
+- MongoDB Atlas
 
 ## Getting Started
 
@@ -30,6 +31,25 @@ Install dependencies:
 
 ```bash
 npm install
+```
+
+Create a `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Add your MongoDB Atlas connection string:
+
+```text
+MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB=hanzalah_supermarket
+```
+
+Seed the database if it is empty:
+
+```bash
+npm run db:seed
 ```
 
 Run the production-style local server:
@@ -64,6 +84,18 @@ Check backend/API syntax and build frontend:
 npm run check
 ```
 
+Seed MongoDB Atlas:
+
+```bash
+npm run db:seed
+```
+
+Reset and reseed MongoDB Atlas:
+
+```bash
+npm run db:seed:force
+```
+
 ## Barcode Workflow
 
 Most USB barcode scanners work like a keyboard: focus the barcode input, scan the barcode, and the scanner types the code then presses Enter.
@@ -83,17 +115,24 @@ Deploy from GitHub using Vercel defaults:
 - Build command: `npm run build`
 - Output directory: `dist`
 
-## Data Persistence Note
+Add these Vercel environment variables:
 
-Local development uses `data/store.json` for storage.
+```text
+MONGODB_URI
+MONGODB_DB
+```
 
-On Vercel, serverless functions do not permanently write to local JSON files. The deployed version works as a demo, but changes may reset. For production use, connect a database such as MongoDB, Supabase, Neon, or Vercel Postgres.
+## Data Persistence
+
+The app now uses MongoDB Atlas for persistent products, sales, orders, customers, suppliers, and purchases. The local `data/store.json` file is only seed data for initializing MongoDB.
 
 ## Project Structure
 
 ```text
 api/                 Vercel serverless API
-data/                Local JSON data
+data/                Seed JSON data
+lib/                 MongoDB database service
+scripts/             Database seed scripts
 src/components/      Reusable UI components
 src/pages/           Dashboard pages
 src/lib/             API and analytics helpers
