@@ -4,23 +4,223 @@
 
 @layer base {
   body {
-    @apply bg-slate-100 text-slate-950 antialiased;
+    @apply bg-[#26000b] text-neutral-100 antialiased;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   button,
   input,
-  select {
+  select,
+  textarea {
     font: inherit;
+  }
+
+  ::selection {
+    @apply bg-pink-500/40 text-white;
   }
 }
 
 @layer components {
   .field {
-    @apply h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition hover:border-slate-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-700/15;
+    @apply h-11 w-full rounded-xl border border-white/10 bg-[#101010] px-3 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 hover:border-pink-400/40 focus:border-pink-400 focus:ring-4 focus:ring-pink-500/10;
   }
 
   .label {
-    @apply grid gap-1.5 text-sm font-black text-slate-500;
+    @apply grid gap-1.5 text-sm font-black text-neutral-400;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#ff2d83] px-4 py-2 text-sm font-black text-white shadow-lg shadow-pink-500/15 transition hover:bg-[#ff4b95] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-muted {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-black text-neutral-200 transition hover:border-pink-400/30 hover:bg-white/10;
+  }
+
+  .surface-panel {
+    @apply rounded-2xl border border-white/10 bg-[#151515] shadow-[0_22px_70px_rgba(0,0,0,0.28)];
+  }
+}
+
+@layer utilities {
+  .shadow-soft,
+  .shadow-card {
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28) !important;
+  }
+
+  .bg-white,
+  .bg-slate-50,
+  .bg-slate-100 {
+    background-color: #1b1b1b !important;
+  }
+
+  .hover\:bg-slate-50:hover,
+  .hover\:bg-slate-100:hover,
+  .hover\:bg-slate-200:hover {
+    background-color: #242424 !important;
+  }
+
+  .bg-teal-50 {
+    background-color: rgba(45, 212, 191, 0.09) !important;
+  }
+
+  .bg-violet-50 {
+    background-color: rgba(168, 85, 247, 0.1) !important;
+  }
+
+  .bg-red-50 {
+    background-color: rgba(248, 113, 113, 0.1) !important;
+  }
+
+  .bg-emerald-50 {
+    background-color: rgba(52, 211, 153, 0.1) !important;
+  }
+
+  .bg-amber-50 {
+    background-color: rgba(251, 191, 36, 0.1) !important;
+  }
+
+  .bg-blue-50 {
+    background-color: rgba(96, 165, 250, 0.1) !important;
+  }
+
+  .bg-teal-600 {
+    background-color: #ff2d83 !important;
+  }
+
+  .hover\:bg-teal-700:hover {
+    background-color: #ff4b95 !important;
+  }
+
+  .shadow-teal-600\/15 {
+    --tw-shadow-color: rgba(255, 45, 131, 0.15) !important;
+    --tw-shadow: var(--tw-shadow-colored) !important;
+  }
+
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700 {
+    color: #f5f5f5 !important;
+  }
+
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400 {
+    color: #9ca3af !important;
+  }
+
+  .text-teal-700,
+  .text-teal-900 {
+    color: #35f4df !important;
+  }
+
+  .border-slate-200,
+  .border-slate-300,
+  .border-teal-100 {
+    border-color: rgba(255, 255, 255, 0.09) !important;
+  }
+
+  .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  table {
+    color: #f5f5f5;
+  }
+
+  thead {
+    background-color: #202020 !important;
+    color: #8b8b8b !important;
+  }
+
+  tbody tr {
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #ff2d83;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    fill: #8b8b8b;
+  }
+
+  .recharts-default-tooltip {
+    background: #1f1f1f !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 #151515;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #151515;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border-radius: 999px;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 auto;
+    box-shadow: none !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .receipt-print {
+    width: 80mm;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-area .rounded-2xl,
+  .print-area .rounded-xl,
+  .print-area table,
+  .print-area thead,
+  .print-area tbody,
+  .print-area tr,
+  .print-area th,
+  .print-area td {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #111 !important;
+    box-shadow: none !important;
+  }
+
+  .print-area strong,
+  .print-area span,
+  .print-area p,
+  .print-area h1,
+  .print-area h2 {
+    color: #000 !important;
   }
 }

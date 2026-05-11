@@ -5,7 +5,7 @@ import Pagination from "../components/Pagination";
 import { saveProduct } from "../lib/api";
 
 const emptyProduct = { id: "", sku: "", barcode: "", name: "", category: "", supplierId: "", stock: 0, minStock: 0, cost: 0, price: 0 };
-const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value || 0);
+import { money } from "../lib/format";
 
 export default function Inventory({ products, suppliers, refresh }) {
   const [query, setQuery] = useState("");
@@ -105,3 +105,4 @@ function ProductModal({ product, suppliers, close, save }) {
     </div>
   );
 }
+

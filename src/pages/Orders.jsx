@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { FaFilter, FaPlus, FaShoppingCart } from "react-icons/fa";
+import BarcodeScanner from "../components/BarcodeScanner";
 import Card from "../components/Card";
 import Pagination from "../components/Pagination";
 import { createOrder, findProductByBarcode } from "../lib/api";
 
-const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value || 0);
+import { money } from "../lib/format";
 
 export default function Orders({ orders, products, refresh }) {
   const [query, setQuery] = useState("");
@@ -103,17 +104,22 @@ function OrderModal({ close, products, refresh }) {
     });
   };
 
-  const scanBarcode = async event => {
-    event.preventDefault();
-    if (!barcode.trim()) return;
+  const handleBarcode = async code => {
+    if (!code.trim()) return;
     setMessage("");
     try {
-      const product = await findProductByBarcode(barcode.trim());
+      const product = await findProductByBarcode(code.trim());
       addProduct(product);
+      setMessage(`${product.name} added from barcode.`);
       setBarcode("");
     } catch (error) {
       setMessage(error.message);
     }
+  };
+
+  const scanBarcode = event => {
+    event.preventDefault();
+    handleBarcode(barcode);
   };
 
   const updateItemQuantity = (productId, quantity) => {
@@ -153,15 +159,16 @@ function OrderModal({ close, products, refresh }) {
           <label className="label">Total<input name="total" className="field" type="number" step="0.01" min="0" value={computedTotal ? computedTotal.toFixed(2) : form.total} onChange={update} readOnly={items.length > 0} required /></label>
           <label className="label sm:col-span-2">Date<input name="date" className="field" type="date" value={form.date} onChange={update} required /></label>
         </div>
-        <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-4">
-          <label className="label text-teal-900">
-            Scan Product Barcode
-            <div className="flex gap-2">
-              <input className="field bg-white" value={barcode} onChange={event => setBarcode(event.target.value)} onKeyDown={event => { if (event.key === "Enter") scanBarcode(event); }} placeholder="Focus here and scan product barcode" />
-              <button onClick={scanBarcode} className="rounded-xl bg-teal-600 px-4 font-black text-white hover:bg-teal-700" type="button">Add</button>
-            </div>
-          </label>
-          <select className="field mt-3 bg-white" onChange={event => { const product = products.find(item => item.id === event.target.value); if (product) addProduct(product); event.target.value = ""; }} defaultValue="">
+        <div className="mt-5 grid gap-3">
+          <BarcodeScanner
+            label="Scan Product Barcode"
+            value={barcode}
+            onChange={setBarcode}
+            onManualSubmit={scanBarcode}
+            onDetected={handleBarcode}
+            buttonLabel="Add"
+          />
+          <select className="field bg-white" onChange={event => { const product = products.find(item => item.id === event.target.value); if (product) addProduct(product); event.target.value = ""; }} defaultValue="">
             <option value="">Or choose product manually</option>
             {products.map(product => <option key={product.id} value={product.id}>{product.name} - {product.barcode || product.sku}</option>)}
           </select>
@@ -204,3 +211,4 @@ function StatusBadge({ status }) {
   };
   return <span className={`rounded-full px-3 py-1 text-xs font-black capitalize ${styles[status]}`}>{status}</span>;
 }
+

@@ -1,7 +1,27 @@
 import { extraCustomers, orders } from "../data/mockData";
 
+function authHeaders() {
+  try {
+    const session = JSON.parse(localStorage.getItem("hanzalah-session"));
+    return session?.token ? { Authorization: `Bearer ${session.token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function login(username, password) {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to login.");
+  return data;
+}
+
 export async function loadDashboardData() {
-  const response = await fetch("/api/store");
+  const response = await fetch("/api/store", { headers: authHeaders() });
   const store = await response.json();
 
   if (!response.ok) {
@@ -26,7 +46,7 @@ export async function loadDashboardData() {
 export async function createOrder(order) {
   const response = await fetch("/api/orders", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(order)
   });
   const data = await response.json();
@@ -35,7 +55,7 @@ export async function createOrder(order) {
 }
 
 export async function findProductByBarcode(barcode) {
-  const response = await fetch(`/api/products/barcode/${encodeURIComponent(barcode)}`);
+  const response = await fetch(`/api/products/barcode/${encodeURIComponent(barcode)}`, { headers: authHeaders() });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "No product found for this barcode.");
   return data;
@@ -155,7 +175,7 @@ export async function saveProduct(product) {
 
   const response = await fetch(id ? `/api/products/${id}` : "/api/products", {
     method: id ? "PUT" : "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(payload)
   });
   const data = await response.json();
@@ -166,10 +186,79 @@ export async function saveProduct(product) {
 export async function recordSale(sale) {
   const response = await fetch("/api/sales", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(sale)
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Unable to record sale.");
+  return data;
+}
+
+export async function createContact(contact) {
+  const response = await fetch("/api/contacts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(contact)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to save contact.");
+  return data;
+}
+
+export async function updateContact(id, contact) {
+  const response = await fetch(`/api/contacts/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(contact)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to update contact.");
+  return data;
+}
+
+export async function recordPurchase(purchase) {
+  const response = await fetch("/api/purchases", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(purchase)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to record purchase.");
+  return data;
+}
+
+export async function recordRefund(refund) {
+  const response = await fetch("/api/refunds", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(refund)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to record refund.");
+  return data;
+}
+
+export async function saveSettings(settings) {
+  const response = await fetch("/api/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(settings)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to save settings.");
+  return data;
+}
+
+export async function saveUser(user) {
+  const id = user.id;
+  const payload = { ...user };
+  delete payload.id;
+  const response = await fetch(id ? `/api/users/${id}` : "/api/users", {
+    method: id ? "PUT" : "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Unable to save user.");
   return data;
 }

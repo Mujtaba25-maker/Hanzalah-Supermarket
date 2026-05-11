@@ -65,7 +65,31 @@ function sendServiceResult(res, result) {
   sendJson(res, result.status || 200, result.data);
 }
 
+function authToken(req) {
+  const header = req.headers.authorization || "";
+  return header.startsWith("Bearer ") ? header.slice(7) : "";
+}
+
+function can(user, roles) {
+  return roles.includes(user.role);
+}
+
+function forbidden(res) {
+  sendError(res, 403, "You do not have permission for this action.");
+}
+
 async function handleApi(req, res, pathname) {
+  if (req.method === "POST" && pathname === "/api/auth/login") {
+    sendServiceResult(res, await db.loginUser(await readBody(req)));
+    return;
+  }
+
+  const user = await db.verifySession(authToken(req));
+  if (!user) {
+    sendError(res, 401, "Please login to continue.");
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/api/store") {
     sendJson(res, 200, await db.getStore());
     return;
@@ -80,37 +104,73 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "POST" && pathname === "/api/products") {
-    sendServiceResult(res, await db.createProduct(await readBody(req)));
+    if (!can(user, ["admin", "manager"])) return forbidden(res);
+    sendServiceResult(res, await db.createProduct(await readBody(req), user));
     return;
   }
 
   if (req.method === "PUT" && pathname.startsWith("/api/products/")) {
-    sendServiceResult(res, await db.updateProduct(pathname.split("/").pop(), await readBody(req)));
+    if (!can(user, ["admin", "manager"])) return forbidden(res);
+    sendServiceResult(res, await db.updateProduct(pathname.split("/").pop(), await readBody(req), user));
     return;
   }
 
   if (req.method === "DELETE" && pathname.startsWith("/api/products/")) {
-    sendServiceResult(res, await db.deleteProduct(pathname.split("/").pop()));
+    if (!can(user, ["admin"])) return forbidden(res);
+    sendServiceResult(res, await db.deleteProduct(pathname.split("/").pop(), user));
     return;
   }
 
   if (req.method === "POST" && pathname === "/api/contacts") {
-    sendServiceResult(res, await db.createContact(await readBody(req)));
+    const body = await readBody(req);
+    if (body.type === "supplier" && !can(user, ["admin", "manager"])) return forbidden(res);
+    sendServiceResult(res, await db.createContact(body, user));
+    return;
+  }
+
+  if (req.method === "PUT" && pathname.startsWith("/api/contacts/")) {
+    const body = await readBody(req);
+    if (body.type === "supplier" && !can(user, ["admin", "manager"])) return forbidden(res);
+    sendServiceResult(res, await db.updateContact(pathname.split("/").pop(), body, user));
     return;
   }
 
   if (req.method === "POST" && pathname === "/api/sales") {
-    sendServiceResult(res, await db.createSale(await readBody(req)));
+    sendServiceResult(res, await db.createSale(await readBody(req), user));
     return;
   }
 
   if (req.method === "POST" && pathname === "/api/orders") {
-    sendServiceResult(res, await db.createOrder(await readBody(req)));
+    sendServiceResult(res, await db.createOrder(await readBody(req), user));
     return;
   }
 
   if (req.method === "POST" && pathname === "/api/purchases") {
-    sendServiceResult(res, await db.createPurchase(await readBody(req)));
+    if (!can(user, ["admin", "manager"])) return forbidden(res);
+    sendServiceResult(res, await db.createPurchase(await readBody(req), user));
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/refunds") {
+    sendServiceResult(res, await db.createRefund(await readBody(req), user));
+    return;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/settings") {
+    if (!can(user, ["admin"])) return forbidden(res);
+    sendServiceResult(res, await db.updateSettings(await readBody(req), user));
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/users") {
+    if (!can(user, ["admin"])) return forbidden(res);
+    sendServiceResult(res, await db.createUser(await readBody(req), user));
+    return;
+  }
+
+  if (req.method === "PUT" && pathname.startsWith("/api/users/")) {
+    if (!can(user, ["admin"])) return forbidden(res);
+    sendServiceResult(res, await db.updateUser(pathname.split("/").pop(), await readBody(req), user));
     return;
   }
 
@@ -173,5 +233,6 @@ server.on("error", error => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Hanzalah Supermarket running at http://localhost:${PORT}`);
+  console.log(`Hanzala Supermarket running at http://localhost:${PORT}`);
 });
+
