@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { FaBell, FaBoxOpen, FaChartBar, FaChartLine, FaCog, FaFileInvoice, FaSearch, FaShoppingCart, FaStore, FaTruck, FaUsers } from "react-icons/fa";
 import { FiChevronLeft, FiChevronRight, FiRefreshCw } from "react-icons/fi";
+import adminPhoto from "../assets/admin-photo.jpeg";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: FaChartLine, roles: ["admin", "manager", "cashier"] },
@@ -118,7 +119,7 @@ export default function Layout({ children, refresh, currentUser, onLogout }) {
                 )}
               </div>
               <button className="flex h-11 items-center gap-2 rounded-xl bg-[#090b18] px-3 text-sm font-black text-white" type="button">
-                <img className="h-8 w-8 rounded-full object-cover ring-2 ring-[#38f2e1]/40" src="/admin-profile.jpeg" alt={`${currentUser?.name || "Admin"} profile`} />
+                <img className="h-8 w-8 rounded-full object-cover ring-2 ring-[#38f2e1]/40" src={adminPhoto} alt={`${currentUser?.name || "Admin"} profile`} />
                 <span className="hidden sm:inline">{currentUser?.role || "staff"}</span>
               </button>
             </div>
@@ -129,3 +130,6 @@ export default function Layout({ children, refresh, currentUser, onLogout }) {
     </div>
   );
 }
+
+
+

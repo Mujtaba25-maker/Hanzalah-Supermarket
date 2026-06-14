@@ -24,6 +24,11 @@ export async function loadDashboardData() {
   const response = await fetch("/api/store", { headers: authHeaders() });
   const store = await response.json();
 
+  if (response.status === 401) {
+    localStorage.removeItem("hanzalah-session");
+    throw new Error("SESSION_EXPIRED");
+  }
+
   if (!response.ok) {
     throw new Error(store.error || "Unable to load store data.");
   }
@@ -262,3 +267,5 @@ export async function saveUser(user) {
   if (!response.ok) throw new Error(data.error || "Unable to save user.");
   return data;
 }
+
+

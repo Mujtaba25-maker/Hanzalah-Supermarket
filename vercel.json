@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "build",
   "rewrites": [
     {
       "source": "/(.*)",
@@ -8,3 +8,4 @@
     }
   ]
 }
+

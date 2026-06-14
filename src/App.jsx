@@ -51,6 +51,10 @@ export default function App() {
       setData(await loadDashboardData());
       setError("");
     } catch (err) {
+      if (err.message === "SESSION_EXPIRED") {
+        handleLogout();
+        return;
+      }
       setError(err.message);
     } finally {
       setLoading(false);
@@ -110,3 +114,5 @@ export default function App() {
 function PageLoader() {
   return <div className="rounded-2xl border border-white/10 bg-[#151515] p-8 font-bold text-neutral-400 shadow-card">Loading page...</div>;
 }
+
+

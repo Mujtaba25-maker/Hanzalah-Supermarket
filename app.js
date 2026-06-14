@@ -8,7 +8,7 @@ const db = require("./lib/database");
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
-const DIST_DIR = path.join(ROOT, "dist");
+const DIST_DIR = path.join(ROOT, "build");
 const PUBLIC_DIR = fs.existsSync(DIST_DIR) ? DIST_DIR : path.join(ROOT, "public");
 
 const contentTypes = {
@@ -235,4 +235,5 @@ server.on("error", error => {
 server.listen(PORT, () => {
   console.log(`Hanzala Supermarket running at http://localhost:${PORT}`);
 });
+
 
