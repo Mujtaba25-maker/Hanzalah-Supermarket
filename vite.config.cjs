@@ -5,7 +5,7 @@ module.exports = defineConfig({
   plugins: [react()],
   build: {
     outDir: "build",
-    emptyOutDir: false,
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks(id) {

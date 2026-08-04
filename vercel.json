@@ -3,9 +3,12 @@
   "outputDirectory": "build",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/[...path].js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
 }
-

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "server": "node app.js",
-    "dev": "vite --host 127.0.0.1",
+    "dev": "node scripts/dev.js",
+    "dev:web": "vite --host 127.0.0.1",
     "build": "vite build",
     "check": "node --check app.js && node --check \"api/[...path].js\" && node --check lib/database.js && node --check scripts/seed-mongodb.js && vite build",
     "db:seed": "node scripts/seed-mongodb.js",

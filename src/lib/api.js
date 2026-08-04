@@ -1,5 +1,21 @@
 import { extraCustomers, orders } from "../data/mockData";
 
+async function readJsonResponse(response) {
+  const text = await response.text();
+  if (!text) {
+    if (!response.ok) {
+      throw new Error("Server returned no data. Make sure the backend is running with npm start.");
+    }
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("Server returned an invalid response instead of JSON.");
+  }
+}
+
 function authHeaders() {
   try {
     const session = JSON.parse(localStorage.getItem("hanzalah-session"));
@@ -15,14 +31,14 @@ export async function login(username, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to login.");
   return data;
 }
 
 export async function loadDashboardData() {
   const response = await fetch("/api/store", { headers: authHeaders() });
-  const store = await response.json();
+  const store = await readJsonResponse(response);
 
   if (response.status === 401) {
     localStorage.removeItem("hanzalah-session");
@@ -54,14 +70,14 @@ export async function createOrder(order) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(order)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to create order.");
   return data;
 }
 
 export async function findProductByBarcode(barcode) {
   const response = await fetch(`/api/products/barcode/${encodeURIComponent(barcode)}`, { headers: authHeaders() });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "No product found for this barcode.");
   return data;
 }
@@ -183,7 +199,7 @@ export async function saveProduct(product) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(payload)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to save product.");
   return data;
 }
@@ -194,7 +210,7 @@ export async function recordSale(sale) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(sale)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to record sale.");
   return data;
 }
@@ -205,7 +221,7 @@ export async function createContact(contact) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(contact)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to save contact.");
   return data;
 }
@@ -216,7 +232,7 @@ export async function updateContact(id, contact) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(contact)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to update contact.");
   return data;
 }
@@ -227,7 +243,7 @@ export async function recordPurchase(purchase) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(purchase)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to record purchase.");
   return data;
 }
@@ -238,7 +254,7 @@ export async function recordRefund(refund) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(refund)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to record refund.");
   return data;
 }
@@ -249,7 +265,7 @@ export async function saveSettings(settings) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(settings)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to save settings.");
   return data;
 }
@@ -263,7 +279,7 @@ export async function saveUser(user) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(payload)
   });
-  const data = await response.json();
+  const data = await readJsonResponse(response);
   if (!response.ok) throw new Error(data.error || "Unable to save user.");
   return data;
 }

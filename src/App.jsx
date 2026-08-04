@@ -15,6 +15,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Reports = lazy(() => import("./pages/Reports"));
 
 const SESSION_KEY = "hanzalah-session";
+const THEME_KEY = "hanzalah-theme";
 const roleAccess = {
   dashboard: ["admin", "manager", "cashier"],
   sales: ["admin", "manager", "cashier"],
@@ -39,6 +40,7 @@ export default function App() {
       return null;
     }
   });
+  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || "dark");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,6 +64,11 @@ export default function App() {
   };
 
   useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  useEffect(() => {
     refresh();
   }, [session]);
 
@@ -77,9 +84,11 @@ export default function App() {
     setError("");
   };
 
+  const toggleTheme = () => setTheme(value => (value === "dark" ? "light" : "dark"));
+
   if (!session) {
     return (
-      <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<PageLoader theme={theme} />}>
         <Login onLogin={handleLogin} />
       </Suspense>
     );
@@ -87,23 +96,23 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Layout refresh={refresh} currentUser={currentUser} onLogout={handleLogout}>
+      <Layout refresh={refresh} currentUser={currentUser} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme}>
         {loading && <div className="rounded-2xl border border-white/10 bg-[#151515] p-8 font-bold text-neutral-400 shadow-card">Loading dashboard data...</div>}
         {error && <div className="rounded-xl border border-red-200 bg-red-50 p-5 font-semibold text-red-700">{error}</div>}
         {data && !loading && (
-          <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard data={data} />} />
-            <Route path="/sales" element={<Sales data={data} refresh={refresh} />} />
-            <Route path="/orders" element={<Orders orders={data.orders} products={data.products} refresh={refresh} />} />
-            <Route path="/inventory" element={canAccess(currentUser, "inventory") ? <Inventory products={data.products} suppliers={data.suppliers} refresh={refresh} /> : <Navigate to="/dashboard" replace />} />
-            <Route path="/customers" element={<Customers customers={data.customersView} refresh={refresh} />} />
-            <Route path="/suppliers" element={canAccess(currentUser, "suppliers") ? <Suppliers suppliers={data.suppliers} products={data.products} purchases={data.purchases} refresh={refresh} /> : <Navigate to="/dashboard" replace />} />
-            <Route path="/invoice" element={<Invoice sales={data.sales} orders={data.orders} customers={data.customers} />} />
-            <Route path="/reports" element={canAccess(currentUser, "reports") ? <Reports data={data} /> : <Navigate to="/dashboard" replace />} />
-            <Route path="/settings" element={canAccess(currentUser, "settings") ? <Settings settings={data.settings} users={data.users} audits={data.audits} refresh={refresh} /> : <Navigate to="/dashboard" replace />} />
-          </Routes>
+          <Suspense fallback={<PageLoader theme={theme} />}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard data={data} theme={theme} />} />
+              <Route path="/sales" element={<Sales data={data} refresh={refresh} />} />
+              <Route path="/orders" element={<Orders orders={data.orders} products={data.products} refresh={refresh} />} />
+              <Route path="/inventory" element={canAccess(currentUser, "inventory") ? <Inventory products={data.products} suppliers={data.suppliers} refresh={refresh} /> : <Navigate to="/dashboard" replace />} />
+              <Route path="/customers" element={<Customers customers={data.customersView} refresh={refresh} />} />
+              <Route path="/suppliers" element={canAccess(currentUser, "suppliers") ? <Suppliers suppliers={data.suppliers} products={data.products} purchases={data.purchases} refresh={refresh} /> : <Navigate to="/dashboard" replace />} />
+              <Route path="/invoice" element={<Invoice sales={data.sales} orders={data.orders} customers={data.customers} />} />
+              <Route path="/reports" element={canAccess(currentUser, "reports") ? <Reports data={data} /> : <Navigate to="/dashboard" replace />} />
+              <Route path="/settings" element={canAccess(currentUser, "settings") ? <Settings settings={data.settings} users={data.users} audits={data.audits} refresh={refresh} /> : <Navigate to="/dashboard" replace />} />
+            </Routes>
           </Suspense>
         )}
       </Layout>
@@ -111,8 +120,7 @@ export default function App() {
   );
 }
 
-function PageLoader() {
-  return <div className="rounded-2xl border border-white/10 bg-[#151515] p-8 font-bold text-neutral-400 shadow-card">Loading page...</div>;
+function PageLoader({ theme = "dark" }) {
+  const light = theme === "light";
+  return <div className={`rounded-2xl border p-8 font-bold shadow-card ${light ? "border-slate-200 bg-white text-slate-500" : "border-white/10 bg-[#151515] text-neutral-400"}`}>Loading page...</div>;
 }
-
-
