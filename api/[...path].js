@@ -35,7 +35,9 @@ function forbidden(res) {
 
 module.exports = async function handler(req, res) {
   try {
-    const parts = Array.isArray(req.query.path) ? req.query.path : [];
+    const parts = Array.isArray(req.query.path)
+      ? req.query.path
+      : String(req.query.path || "").split("/").filter(Boolean);
     const [resource, id, extra] = parts;
 
     if (req.method === "POST" && resource === "auth" && id === "login") {
