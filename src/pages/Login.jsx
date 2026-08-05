@@ -3,8 +3,8 @@ import { FaLock, FaStore, FaUserShield } from "react-icons/fa";
 import { login } from "../lib/api";
 
 export default function Login({ onLogin }) {
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -53,13 +53,6 @@ export default function Login({ onLogin }) {
 
           <button className="btn-primary h-12" disabled={loading} type="submit">{loading ? "Signing in..." : "Login"}</button>
         </form>
-
-        <div className="mt-6 rounded-2xl bg-white/5 p-4 text-sm text-neutral-400">
-          <p className="font-black text-neutral-200">Default accounts</p>
-          <p>Admin: admin / admin123</p>
-          <p>Manager: manager / manager123</p>
-          <p>Cashier: cashier / cashier123</p>
-        </div>
       </section>
     </main>
   );
