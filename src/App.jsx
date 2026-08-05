@@ -48,7 +48,8 @@ export default function App() {
 
   const refresh = async () => {
     if (!session) return;
-    setLoading(true);
+    const showFullLoader = !data;
+    setLoading(showFullLoader);
     try {
       setData(await loadDashboardData());
       setError("");
@@ -59,7 +60,7 @@ export default function App() {
       }
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (showFullLoader) setLoading(false);
     }
   };
 
@@ -97,9 +98,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Layout refresh={refresh} currentUser={currentUser} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme}>
-        {loading && <div className="rounded-2xl border border-white/10 bg-[#151515] p-8 font-bold text-neutral-400 shadow-card">Loading dashboard data...</div>}
+        {loading && !data && <div className="rounded-2xl border border-white/10 bg-[#151515] p-8 font-bold text-neutral-400 shadow-card">Loading dashboard data...</div>}
         {error && <div className="rounded-xl border border-red-200 bg-red-50 p-5 font-semibold text-red-700">{error}</div>}
-        {data && !loading && (
+        {data && (
           <Suspense fallback={<PageLoader theme={theme} />}>
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
