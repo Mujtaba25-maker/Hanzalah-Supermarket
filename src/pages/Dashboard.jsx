@@ -56,7 +56,7 @@ export default function Dashboard({ data, theme = "dark" }) {
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <MiniSummary label="Today sales" value={money(todayRevenue)} detail={`${todaysSales.length} transaction(s)`} tone={styles.valueBlue} styles={styles} />
+            <MiniSummary label="Today's sales" value={money(todayRevenue)} detail={`${todaysSales.length} transaction(s)`} tone={styles.valueBlue} styles={styles} />
             <MiniSummary label="Today profit" value={money(todayProfit)} detail="Live from backend sales" tone={styles.valueGreen} styles={styles} />
             <MiniSummary label="Needs attention" value={pendingOrders + data.summary.lowStock} detail="Orders and low stock" tone={styles.valueRose} styles={styles} />
           </div>

@@ -11,7 +11,7 @@ const nav = [
   { to: "/inventory", label: "Inventory", icon: FaBoxOpen, roles: ["admin", "manager"] },
   { to: "/customers", label: "Customers", icon: FaUsers, roles: ["admin", "manager", "cashier"] },
   { to: "/suppliers", label: "Suppliers", icon: FaTruck, roles: ["admin", "manager"] },
-  { to: "/invoice", label: "Invoice", icon: FaFileInvoice, roles: ["admin", "manager", "cashier"] },
+  { to: "/invoice", label: "Invoices", icon: FaFileInvoice, roles: ["admin", "manager", "cashier"] },
   { to: "/reports", label: "Reports", icon: FaChartBar, roles: ["admin", "manager"] },
   { to: "/settings", label: "Settings", icon: FaCog, roles: ["admin"] }
 ];
@@ -36,6 +36,7 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
   const [title, subtitle] = titles[location.pathname] || titles["/dashboard"];
   const light = theme === "light";
   const styles = light ? lightStyles : darkStyles;
+  const profileLabel = currentUser?.role === "admin" ? "Admin User" : currentUser?.role || "staff";
 
   return (
     <div className={`theme-${theme} min-h-screen transition-colors lg:grid lg:grid-cols-[auto_minmax(0,1fr)] ${styles.shell}`}>
@@ -120,7 +121,7 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
               </div>
               <button className={`flex h-11 items-center gap-2 rounded-xl px-3 text-sm font-black ${styles.profile}`} type="button">
                 <img className="h-8 w-8 rounded-full object-cover ring-2 ring-[#38f2e1]/40" src={adminPhoto} alt={`${currentUser?.name || "Admin"} profile`} />
-                <span className="hidden sm:inline">{currentUser?.role || "staff"}</span>
+                <span className="hidden sm:inline">{profileLabel}</span>
               </button>
             </div>
           </div>

@@ -2,11 +2,12 @@ import { useState } from "react";
 import { FaCog, FaPlus, FaStore, FaUserShield } from "react-icons/fa";
 import Card from "../components/Card";
 import { saveSettings, saveUser } from "../lib/api";
+import { CURRENCY } from "../lib/format";
 
 const emptyUser = { id: "", name: "", username: "", role: "cashier", password: "", active: true };
 
 export default function Settings({ settings, users, audits, refresh }) {
-  const [form, setForm] = useState(settings);
+  const [form, setForm] = useState({ ...settings, currency: CURRENCY });
   const [message, setMessage] = useState("");
   const [modalUser, setModalUser] = useState(null);
   const update = event => {
@@ -17,7 +18,7 @@ export default function Settings({ settings, users, audits, refresh }) {
   const submit = async event => {
     event.preventDefault();
     try {
-      await saveSettings(form);
+      await saveSettings({ ...form, currency: CURRENCY });
       await refresh();
       setMessage("Settings saved.");
     } catch (error) {
@@ -31,7 +32,7 @@ export default function Settings({ settings, users, audits, refresh }) {
         <Card title="Store Profile" icon={FaStore}>
           <form className="grid gap-4" onSubmit={submit}>
             <label className="label">Store Name<input name="storeName" className="field" value={form.storeName || ""} onChange={update} /></label>
-            <label className="label">Currency<select name="currency" className="field" value={form.currency || "AFN"} onChange={update}><option>AFN</option><option>USD</option><option>EUR</option></select></label>
+            <label className="label">Currency<select name="currency" className="field" value={CURRENCY} onChange={update}><option>{CURRENCY}</option></select></label>
             <label className="label">Low Stock Alert<input name="lowStockAlert" className="field" type="number" value={form.lowStockAlert || 10} onChange={update} /></label>
             <label className="label">Receipt Footer<input name="receiptFooter" className="field" value={form.receiptFooter || ""} onChange={update} /></label>
             {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">{message}</p>}

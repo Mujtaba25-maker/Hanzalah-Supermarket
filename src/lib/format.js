@@ -1,11 +1,10 @@
 export const APP_NAME = "Hanzala Supermarket";
 export const CURRENCY = "AFN";
+const AFGHANI_SYMBOL = "؋";
 
 export function money(value) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: CURRENCY,
-    currencyDisplay: "narrowSymbol",
+  const amount = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0
   }).format(value || 0);
+  return `${AFGHANI_SYMBOL}${amount}`;
 }
