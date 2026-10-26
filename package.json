@@ -9,9 +9,11 @@
     "dev": "node scripts/dev.js",
     "dev:web": "vite --host 127.0.0.1",
     "build": "vite build",
-    "check": "node --check app.js && node --check \"api/[...path].js\" && node --check lib/database.js && node --check scripts/seed-mongodb.js && vite build",
+    "check": "node --check app.js && node --check \"api/[...path].js\" && node --check lib/database.js && node --check scripts/seed-mongodb.js && node --check lib/access.js && node --check scripts/seed-demo.js && node --check src/lib/analytics.mjs && node --check lib/bootstrap.js && vite build",
     "db:seed": "node scripts/seed-mongodb.js",
-    "db:seed:force": "node scripts/seed-mongodb.js --force"
+    "test": "node --test tests/*.test.*",
+    "db:seed:demo": "node scripts/seed-demo.js",
+    "check:secrets": "node scripts/check-secrets.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

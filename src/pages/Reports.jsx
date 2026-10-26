@@ -3,6 +3,7 @@ import { FaBoxes, FaChartBar, FaDollarSign, FaPrint, FaReceipt } from "react-ico
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import Card from "../components/Card";
 
+import { dateKey, inRange, financials, TIMEZONE } from "../lib/analytics.mjs";
 import { money } from "../lib/format";
 const tooltipStyle = {
   background: "#1f1f1f",
@@ -12,20 +13,17 @@ const tooltipStyle = {
 };
 
 export default function Reports({ data }) {
-  const today = new Date().toISOString().slice(0, 10);
-  const [from, setFrom] = useState(data.sales[0]?.createdAt?.slice(0, 10) || today);
+  const today = dateKey();
+  const [from, setFrom] = useState(data.sales.map(row => dateKey(row.createdAt)).sort()[0] || today);
   const [to, setTo] = useState(today);
 
   const report = useMemo(() => {
-    const inRange = date => {
-      const key = String(date || "").slice(0, 10);
-      return key >= from && key <= to;
-    };
-    const sales = data.sales.filter(sale => inRange(sale.createdAt));
-    const purchases = data.purchases.filter(purchase => inRange(purchase.createdAt));
-    const revenue = sales.reduce((sum, sale) => sum + sale.total, 0);
-    const profit = sales.reduce((sum, sale) => sum + sale.profit, 0);
-    const expense = revenue - profit;
+    const bounds = { start: from, end: to };
+    const sales = data.sales.filter(row => inRange(row, bounds));
+    const purchases = data.purchases.filter(row => inRange(row, bounds));
+    const refunds = data.refunds.filter(row => inRange(row, bounds));
+    const totals = financials(sales, refunds, data.sales);
+    const revenue = totals.revenue, profit = totals.grossProfit, expense = totals.cogs;
     const purchaseSpend = purchases.reduce((sum, purchase) => sum + purchase.total, 0);
     const lowStock = data.products.filter(product => product.stock <= product.minStock);
     const productMap = new Map();
@@ -52,8 +50,8 @@ export default function Reports({ data }) {
 
   const chartRows = [
     { name: "Sales", value: report.revenue },
-    { name: "Expense", value: report.expense },
-    { name: "Profit", value: report.profit },
+    { name: "COGS", value: report.expense },
+    { name: "Gross profit", value: report.profit },
     { name: "Purchases", value: report.purchaseSpend }
   ];
 
@@ -64,9 +62,11 @@ export default function Reports({ data }) {
         icon={FaChartBar}
         action={<button className="btn-primary" onClick={() => window.print()} type="button"><FaPrint /> Print Report</button>}
       >
+        <p className="mb-4 text-sm text-neutral-400">Inclusive dates in {TIMEZONE}. Gross profit excludes operating expenses and taxes. Stock counts show current levels.</p>
+        {from > to && <p role="alert" className="mb-3 text-pink-300">Choose a start date before the end date.</p>}
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="label">From<input className="field" type="date" value={from} onChange={event => setFrom(event.target.value)} /></label>
-          <label className="label">To<input className="field" type="date" value={to} onChange={event => setTo(event.target.value)} /></label>
+          <label className="label">From<input className="field" type="date" value={from} max={to} onChange={event => setFrom(event.target.value)} /></label>
+          <label className="label">To<input className="field" type="date" value={to} min={from} onChange={event => setTo(event.target.value)} /></label>
         </div>
       </Card>
 
@@ -77,16 +77,16 @@ export default function Reports({ data }) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <ReportStat icon={FaDollarSign} label="Total Sales" value={money(report.revenue)} tone="teal" />
-          <ReportStat icon={FaReceipt} label="Total Expense" value={money(report.expense)} tone="rose" />
-          <ReportStat icon={FaChartBar} label="Total Profit" value={money(report.profit)} tone="amber" />
+          <ReportStat icon={FaDollarSign} label="Net sales" value={money(report.revenue)} tone="teal" />
+          <ReportStat icon={FaReceipt} label="Cost of goods sold" value={report.expense === null ? "Unavailable" : money(report.expense)} tone="rose" />
+          <ReportStat icon={FaChartBar} label="Gross profit" value={report.profit === null ? "Unavailable" : money(report.profit)} tone="amber" />
           <ReportStat icon={FaBoxes} label="Low Stock Items" value={report.lowStock.length} tone="white" />
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
           <Card title="Financial Overview" icon={FaChartBar}>
             <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer minWidth={0} initialDimension={{ width: 300, height: 288 }} width="100%" height="100%">
                 <BarChart data={chartRows}>
                   <CartesianGrid strokeDasharray="3 7" stroke="rgba(255,255,255,0.13)" vertical={false} />
                   <XAxis dataKey="name" stroke="#737373" tickLine={false} axisLine={{ stroke: "rgba(255,255,255,0.12)" }} />
@@ -103,17 +103,17 @@ export default function Reports({ data }) {
               <SummaryRow label="Sales Transactions" value={report.sales.length} />
               <SummaryRow label="Stock Purchases" value={report.purchases.length} />
               <SummaryRow label="Purchase Spend" value={money(report.purchaseSpend)} />
-              <SummaryRow label="Average Sale" value={money(report.sales.length ? report.revenue / report.sales.length : 0)} />
-              <SummaryRow label="Profit Margin" value={`${report.revenue ? Math.round((report.profit / report.revenue) * 100) : 0}%`} />
+              <SummaryRow label="Average sale · before returns" value={money(report.sales.length ? report.sales.reduce((sum, row) => sum + row.total, 0) / report.sales.length : 0)} />
+              <SummaryRow label="Gross profit margin" value={report.profit === null ? "Unavailable" : `${report.revenue ? Math.round((report.profit / report.revenue) * 100) : 0}%`} />
             </div>
           </Card>
         </div>
 
-        <Card title="Top Product Performance" icon={FaBoxes}>
+        <Card title="Top products · before returns" icon={FaBoxes}>
           <div className="overflow-auto rounded-xl border border-white/10">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="text-xs uppercase">
-                <tr>{["Product", "Units Sold", "Sales", "Profit"].map(item => <th key={item} className="px-4 py-3 font-black">{item}</th>)}</tr>
+                <tr>{["Product", "Units Sold", "Sales", "Gross profit"].map(item => <th key={item} className="px-4 py-3 font-black">{item}</th>)}</tr>
               </thead>
               <tbody className="divide-y divide-white/10">
                 {report.productRows.map(row => (

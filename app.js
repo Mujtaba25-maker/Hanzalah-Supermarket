@@ -90,14 +90,19 @@ async function handleApi(req, res, pathname) {
     return;
   }
 
+  if (req.method === "POST" && pathname === "/api/auth/logout") {
+    sendServiceResult(res, await db.logout(authToken(req)));
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/api/store") {
-    sendJson(res, 200, await db.getStore());
+    sendJson(res, 200, await db.getStore(user));
     return;
   }
 
   if (req.method === "GET" && pathname.startsWith("/api/products/barcode/")) {
     const barcode = decodeURIComponent(pathname.split("/").pop());
-    const product = await db.findProductByBarcode(barcode);
+    const product = await db.findProductByBarcode(barcode, user);
     if (!product) return sendError(res, 404, "No product found for this barcode.");
     sendJson(res, 200, product);
     return;
@@ -232,8 +237,10 @@ server.on("error", error => {
   throw error;
 });
 
-server.listen(PORT, () => {
+if (require.main === module) server.listen(PORT, () => {
   console.log(`Hanzala Supermarket running at http://localhost:${PORT}`);
 });
 
 
+
+module.exports = { server, handleApi };

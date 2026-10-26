@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { FaChartPie, FaShoppingBag } from "react-icons/fa";
-import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import BarcodeScanner from "../components/BarcodeScanner";
 import Card from "../components/Card";
 import { findProductByBarcode, recordRefund, recordSale } from "../lib/api";
@@ -38,23 +38,24 @@ export default function Sales({ data, refresh }) {
       <Card title="Returns & Refunds" icon={FaShoppingBag} className="xl:col-span-2">
         <RefundForm sales={data.sales} refunds={data.refunds || []} refresh={refresh} />
       </Card>
-      <Card title="Daily Sales Trend" icon={FaShoppingBag} className="xl:col-span-2">
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
+      <Card title="Sales history · all time" icon={FaShoppingBag} className="xl:col-span-2">
+        {data.sales.length || data.refunds.length ? <div className="h-80">
+          <ResponsiveContainer minWidth={0} initialDimension={{ width: 300, height: 288 }} width="100%" height="100%">
             <LineChart data={data.analytics.salesTrend}>
               <CartesianGrid strokeDasharray="3 7" stroke="rgba(255,255,255,0.13)" vertical={false} />
-              <XAxis dataKey="label" stroke="#737373" tickLine={false} axisLine={{ stroke: "rgba(255,255,255,0.12)" }} />
+              <XAxis minTickGap={40} tick={{fontSize: 11}} dataKey="label" stroke="#737373" tickLine={false} axisLine={{ stroke: "rgba(255,255,255,0.12)" }} />
               <YAxis stroke="#737373" tickLine={false} axisLine={false} />
               <Tooltip formatter={value => money(value)} contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="sales" stroke="#35f4df" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#35f4df" }} />
-              <Line type="monotone" dataKey="profit" stroke="#ff2d83" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#ff2d83" }} />
+              <Legend />
+              <Line name="Net sales" type="monotone" dataKey="sales" stroke="#35f4df" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#35f4df" }} />
+              {data.currentUser?.role !== "cashier" && <Line name="Gross profit" type="monotone" dataKey="profit" stroke="#ff2d83" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#ff2d83" }} />}
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </div> : <p className="rounded-xl border border-dashed border-white/10 p-6 text-neutral-400">No sales or refunds recorded yet.</p>}
       </Card>
-      <Card title="Top Selling Products" icon={FaShoppingBag}>
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+      <Card title="Top selling products · all time" icon={FaShoppingBag}>
+        {data.analytics.topProducts.length ? <div className="h-72">
+          <ResponsiveContainer minWidth={0} initialDimension={{ width: 300, height: 288 }} width="100%" height="100%">
             <BarChart data={data.analytics.topProducts}>
               <CartesianGrid strokeDasharray="3 7" stroke="rgba(255,255,255,0.13)" vertical={false} />
               <XAxis dataKey="name" stroke="#737373" tickLine={false} axisLine={{ stroke: "rgba(255,255,255,0.12)" }} />
@@ -63,13 +64,13 @@ export default function Sales({ data, refresh }) {
               <Bar dataKey="units" fill="#ff7a1a" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </div> : <p className="rounded-xl border border-dashed border-white/10 p-6 text-neutral-400">No product sales recorded yet.</p>}
       </Card>
       <Card title="Sales by Category" icon={FaChartPie}>
         {data.analytics.categorySales.length ? (
           <>
             <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer minWidth={0} initialDimension={{ width: 300, height: 288 }} width="100%" height="100%">
                 <PieChart>
                   <Pie data={data.analytics.categorySales} dataKey="value" nameKey="name" outerRadius={95}>
                     {data.analytics.categorySales.map((entry, index) => <Cell key={entry.name} fill={colors[index % colors.length]} />)}
@@ -246,8 +247,8 @@ function SaleForm({ data, refresh }) {
       <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-4">
         <Summary label="Available Stock" value={product.stock ?? 0} />
         <Summary label="Sale Total" value={money(saleTotal)} />
-        <Summary label="Expense" value={money(saleTotal - projectedProfit)} />
-        <Summary label="Profit" value={money(projectedProfit)} />
+        {data.currentUser?.role !== "cashier" && <Summary label="Cost of goods sold" value={money(saleTotal - projectedProfit)} />}
+        {data.currentUser?.role !== "cashier" && <Summary label="Gross profit" value={money(projectedProfit)} />}
       </div>
 
       {Number(quantity) > Number(product.stock) && <p className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">Quantity is greater than available stock.</p>}

@@ -1,8 +1,8 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { useState } from "react";
-import { FaBell, FaBoxOpen, FaChartBar, FaChartLine, FaCog, FaFileInvoice, FaMoon, FaSearch, FaShoppingCart, FaStore, FaSun, FaTruck, FaUsers } from "react-icons/fa";
+import { useRef, useState } from "react";
+import { FaBell, FaBoxOpen, FaChartBar, FaChartLine, FaCog, FaFileInvoice, FaMoon, FaShoppingCart, FaStore, FaSun, FaTruck, FaUsers } from "react-icons/fa";
 import { FiChevronLeft, FiChevronRight, FiRefreshCw } from "react-icons/fi";
-import adminPhoto from "../assets/admin-photo.jpeg";
+
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: FaChartLine, roles: ["admin", "manager", "cashier"] },
@@ -18,7 +18,7 @@ const nav = [
 
 const titles = {
   "/dashboard": ["Dashboard", "A real-time command center for store performance."],
-  "/sales": ["Sales Analytics", "Trends, product performance, and category mix."],
+  "/sales": ["Sales & Checkout", "Scan products, record sales, and review transactions."],
   "/orders": ["Order Management", "Search, filter, sort, and review customer orders."],
   "/inventory": ["Inventory Management", "Track stock levels, pricing, SKUs, and alerts."],
   "/customers": ["Customer Management", "Review customers, contact details, and order activity."],
@@ -28,7 +28,9 @@ const titles = {
   "/settings": ["Settings", "Store profile, preferences, and dashboard controls."]
 };
 
-export default function Layout({ children, refresh, currentUser, onLogout, theme = "dark", onToggleTheme }) {
+export default function Layout({ children, refreshing, refresh, currentUser, onLogout, theme = "dark", onToggleTheme }) {
+  const drawerRef = useRef(null);
+  const menuButtonRef = useRef(null);
   const [collapsed, setCollapsed] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
@@ -36,13 +38,13 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
   const [title, subtitle] = titles[location.pathname] || titles["/dashboard"];
   const light = theme === "light";
   const styles = light ? lightStyles : darkStyles;
-  const profileLabel = currentUser?.role === "admin" ? "Admin User" : currentUser?.role || "staff";
+  const profileLabel = currentUser?.role === "admin" ? "Owner / Admin" : currentUser?.role || "Staff";
 
   return (
     <div className={`theme-${theme} min-h-screen transition-colors lg:grid lg:grid-cols-[auto_minmax(0,1fr)] ${styles.shell}`}>
-      <aside className={`${collapsed ? "lg:w-20" : "lg:w-64"} sticky top-0 z-20 p-4 transition-all lg:h-screen ${styles.sidebar}`}>
+      <aside aria-label="Desktop navigation" className={`hidden lg:block ${collapsed ? "lg:w-20" : "lg:w-64"} sticky top-0 z-20 p-4 transition-all lg:h-screen ${styles.sidebar}`}>
         <div className="mb-6 flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className={collapsed ? "hidden" : "flex min-w-0 items-center gap-3"}>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#ff2d83] text-xl font-black text-white">
               <FaStore />
             </span>
@@ -53,7 +55,7 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
               </div>
             )}
           </div>
-          <button className={`hidden rounded-lg p-2 lg:block ${styles.iconButton}`} onClick={() => setCollapsed(value => !value)} type="button">
+          <button aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed} className={`hidden rounded-lg p-3 lg:block ${styles.iconButton}`} onClick={() => setCollapsed(value => !value)} type="button">
             {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
           </button>
         </div>
@@ -64,6 +66,8 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
             return (
               <NavLink
                 key={`${item.to}-${item.label}-${index}`}
+                aria-label={item.label}
+                title={item.label}
                 to={item.to}
                 className={({ isActive }) =>
                   `flex h-12 items-center gap-3 rounded-xl px-3 text-sm font-extrabold transition ${isActive ? styles.navActive : styles.navIdle} ${collapsed ? "lg:justify-center" : ""}`
@@ -76,34 +80,36 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
           })}
         </nav>
         <div className={`mt-8 hidden border-t pt-5 lg:block ${styles.sidebarDivider}`}>
-          <button onClick={onLogout} className={`flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-bold ${styles.logout}`} type="button">
-            <FaCog /> Log out
+          <button aria-label="Log out" onClick={onLogout} className={`flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-bold ${styles.logout}`} type="button">
+            <FaCog /> {!collapsed && <span>Log out</span>}
           </button>
         </div>
       </aside>
+      <dialog ref={drawerRef} aria-label="Main navigation" className={"mobile-drawer " + styles.sidebar} onClose={() => menuButtonRef.current?.focus()}>
+        <div className="flex items-center justify-between mb-6"><strong>Hanzala Supermarket</strong><button className="btn-muted" onClick={() => drawerRef.current.close()}>Close</button></div>
+        <nav className="grid gap-2">{nav.filter(item => item.roles.includes(currentUser?.role)).map(item => <NavLink key={item.to} to={item.to} onClick={() => drawerRef.current.close()} className={({isActive}) => "flex h-12 items-center gap-3 rounded-xl px-3 font-bold " + (isActive ? styles.navActive : styles.navIdle)}><item.icon/>{item.label}</NavLink>)}</nav>
+        <button onClick={onLogout} className="btn-muted mt-6 w-full">Log out</button>
+      </dialog>
 
       <div className="min-w-0">
         <header className={`sticky top-0 z-10 border-b px-4 py-4 backdrop-blur lg:px-8 ${styles.header}`}>
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <h1 className={`text-2xl font-black lg:text-3xl ${styles.heading}`}>{title}</h1>
-              <p className={`mt-1 text-sm font-medium ${styles.subtle}`}>{subtitle}</p>
+            <div className="flex items-start gap-3">
+              <button ref={menuButtonRef} aria-label="Open navigation" aria-haspopup="dialog" className="btn-muted h-11 lg:hidden" onClick={() => drawerRef.current.showModal()}>☰</button>
+              <div><h1 className={`text-2xl font-black lg:text-3xl ${styles.heading}`}>{title}</h1>
+              <p className={`mt-1 text-sm font-medium ${styles.subtle}`}>{subtitle}</p></div>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="relative min-w-0 flex-1 sm:w-80 sm:flex-none">
-                <FaSearch className={`absolute left-4 top-1/2 -translate-y-1/2 ${styles.searchIcon}`} />
-                <input className={styles.searchInput} placeholder="Search" />
-              </label>
-              <button onClick={refresh} className={`grid h-11 w-11 place-items-center rounded-xl ${styles.iconButton}`} type="button" title="Refresh data">
+            <div className="flex items-center gap-2">
+              <button disabled={refreshing} aria-label={refreshing ? "Refreshing data" : "Refresh data"} onClick={refresh} className={`grid h-11 w-11 place-items-center rounded-xl ${styles.iconButton}`} type="button" title="Refresh data">
                 <FiRefreshCw />
               </button>
-              <div className="relative">
-                <button onClick={() => setShowNotifications(value => !value)} className={`relative grid h-11 w-11 place-items-center rounded-xl ${styles.iconButton}`} type="button" title="Notifications">
+              <div className="static xl:relative">
+                <button aria-expanded={showNotifications} aria-label="Notifications" onClick={() => setShowNotifications(value => !value)} className={`relative grid h-11 w-11 place-items-center rounded-xl ${styles.iconButton}`} type="button" title="Notifications">
                   <FaBell />
                   {notifications.length > 0 && <span className={styles.badge}>{notifications.length}</span>}
                 </button>
                 {showNotifications && (
-                  <div className={`absolute right-0 top-14 z-30 w-80 rounded-2xl border p-3 shadow-soft ${styles.notifications}`}>
+                  <div className={`absolute left-4 right-4 top-full z-30 w-auto xl:left-auto xl:right-0 xl:top-14 xl:w-80 rounded-2xl border p-3 shadow-soft ${styles.notifications}`}>
                     <div className="mb-2 flex items-center justify-between">
                       <strong className={`text-sm font-black ${styles.heading}`}>Notifications</strong>
                       <span className={`text-xs font-bold ${styles.subtle}`}>{notifications.length} alert(s)</span>
@@ -119,10 +125,12 @@ export default function Layout({ children, refresh, currentUser, onLogout, theme
                   </div>
                 )}
               </div>
-              <button className={`flex h-11 items-center gap-2 rounded-xl px-3 text-sm font-black ${styles.profile}`} type="button">
-                <img className="h-8 w-8 rounded-full object-cover ring-2 ring-[#38f2e1]/40" src={adminPhoto} alt={`${currentUser?.name || "Admin"} profile`} />
-                <span className="hidden sm:inline">{profileLabel}</span>
-              </button>
+              <details className="relative ml-auto min-w-0">
+                <summary className={"flex min-h-11 max-w-[200px] cursor-pointer list-none items-center gap-2 rounded-xl px-3 " + styles.profile}>
+                  <span className="min-w-0"><strong className="block truncate text-sm">{currentUser?.name || currentUser?.username}</strong><span className={"block text-[11px] capitalize " + styles.subtle}>{profileLabel}</span></span><span aria-hidden="true">⌄</span>
+                </summary>
+                <div className={"absolute right-0 top-14 z-30 w-48 rounded-xl border p-2 shadow-soft " + styles.notifications}><button className="btn-muted w-full" type="button" onClick={onLogout}>Log out</button></div>
+              </details>
             </div>
           </div>
         </header>
@@ -141,7 +149,7 @@ const darkStyles = {
   sidebar: "bg-[#151515] text-white",
   header: "border-white/5 bg-[#1b1b1b]/95",
   heading: "text-white",
-  subtle: "text-[#8d9bb0]",
+  subtle: "text-[#a9b4c5]",
   navActive: "bg-[#242424] text-white shadow-[inset_3px_0_0_#ff2d83]",
   navIdle: "text-[#c6c6c6] hover:bg-[#202020] hover:text-white",
   navIcon: "text-white/90",

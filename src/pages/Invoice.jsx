@@ -5,7 +5,7 @@ import Pagination from "../components/Pagination";
 
 import { money } from "../lib/format";
 
-export default function Invoice({ sales, orders, customers }) {
+export default function Invoice({ sales, orders, customers, settings = {} }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
   const [page, setPage] = useState(1);
@@ -129,7 +129,7 @@ function ReceiptModal({ invoice, close }) {
 
         <section className="print-area receipt-print rounded-xl bg-white p-5 font-mono text-sm text-black">
           <div className="border-b border-dashed border-black pb-3 text-center">
-            <h2 className="text-xl font-black">Hanzala Supermarket</h2>
+            <h2 className="text-xl font-black">{settings.storeName || "Hanzala Supermarket"}</h2>
             <p>Sales Receipt / Invoice</p>
             <p>Kabul, Afghanistan</p>
           </div>
@@ -168,7 +168,7 @@ function ReceiptModal({ invoice, close }) {
             </div>
           </div>
 
-          <p className="mt-5 text-center">Thank you for shopping with us.</p>
+          <p className="mt-5 text-center">{settings.receiptFooter || "Thank you for shopping with us."}</p>
         </section>
       </div>
     </div>

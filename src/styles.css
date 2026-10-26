@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body, #root { min-width: 0; width: 100%; }
+main, section, article { min-width: 0; }
+.btn-primary, .btn-muted { min-height: 44px; }
+button, a, summary { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, summary:focus-visible, select:focus-visible {
+  outline: 2px solid #ff6eaa; outline-offset: 4px;
+}
+.mobile-drawer { position: fixed; inset: 0 auto 0 0; margin: 0; width: min(320px, 90vw); height: 100dvh; max-height: 100dvh; padding: 24px; border: 0; }
+.mobile-drawer::backdrop { background: rgb(0 0 0 / 65%); }
+.theme-dark thead { color: #b5b5bf !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
 @layer base {
   body {
     @apply bg-[#101114] text-neutral-100 antialiased;

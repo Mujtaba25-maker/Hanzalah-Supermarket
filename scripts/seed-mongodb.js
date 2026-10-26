@@ -2,11 +2,14 @@ require("dotenv").config();
 
 const { seedDatabase } = require("../lib/database");
 
-const force = process.argv.includes("--force");
+if (process.argv.includes("--force")) {
+  console.error("Destructive reseeding is disabled. Use a separate empty demo database.");
+  process.exit(1);
+}
 
-seedDatabase({ force })
+seedDatabase()
   .then(() => {
-    console.log(force ? "MongoDB Atlas reseeded." : "MongoDB Atlas seeded if empty.");
+    console.log("MongoDB indexes, settings and configured bootstrap accounts initialized without resetting records.");
     process.exit(0);
   })
   .catch(error => {

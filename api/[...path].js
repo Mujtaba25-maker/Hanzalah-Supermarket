@@ -49,12 +49,14 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: "Please login to continue." });
     }
 
+    if (req.method === "POST" && resource === "auth" && id === "logout") return sendResult(res, await db.logout(authToken(req)));
+
     if (req.method === "GET" && resource === "store") {
-      return res.status(200).json(await db.getStore());
+      return res.status(200).json(await db.getStore(user));
     }
 
     if (req.method === "GET" && resource === "products" && id === "barcode" && extra) {
-      const product = await db.findProductByBarcode(decodeURIComponent(extra));
+      const product = await db.findProductByBarcode(decodeURIComponent(extra), user);
       if (!product) return res.status(404).json({ error: "No product found for this barcode." });
       return res.status(200).json(product);
     }
