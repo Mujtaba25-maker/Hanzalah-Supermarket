@@ -22,9 +22,27 @@ const database={collection(name){return {
  deleteOne:async query=>{const index=rows[name].findIndex(row=>matches(row,query));if(index>=0)rows[name].splice(index,1);return {deletedCount:index>=0?1:0};}
 };}};
 const mongoPath=require.resolve('mongodb');require(mongoPath);
-require.cache[mongoPath].exports={MongoClient:class {async connect(){return this;}db(){return database;}}};
+require.cache[mongoPath].exports={MongoClient:class {async connect(){return this;}db(name){assert.equal(name,'isolated_startup_test');return database;}}};
 process.env.MONGODB_URI='mongodb://in-memory-test';
+process.env.MONGODB_DB='isolated_startup_test';
+process.env.MONGODB_DEMO_DB='unselected_demo';
 const db=require('../lib/database');
+test('startup keeps the selected database, creates no demo or business activity, and preserves existing settings',async()=>{
+ const existingProducts=rows.products;
+ const existingSettings=structuredClone(rows.settings);
+ rows.products=[];
+ rows.settings=[{id:'store',storeName:'Hanzalah Supermarket',currency:'USD',updatedAt:'2020-01-01'}];
+ const snapshot=structuredClone(rows);
+ try {
+  const store=await db.getStore({id:'a',role:'admin'});
+  assert.deepEqual(store.products,[]);
+  assert.deepEqual(store.sales,[]);
+  assert.deepEqual(store.orders,[]);
+  assert.deepEqual(store.customers,[]);
+  assert.deepEqual(rows,snapshot);
+  assert.equal(store.settings.demo,undefined);
+ } finally {rows.products=existingProducts;rows.settings=existingSettings;}
+});
 test('scanner lookup, checkout, stock, receipts, refund isolation and logout',async()=>{
  const cashier={id:'c',name:'Cashier',role:'cashier'},other={id:'other',role:'cashier'},admin={id:'a',role:'admin'};
  const product=await db.findProductByBarcode('12345',cashier);

@@ -49,8 +49,8 @@ export default function Dashboard({ data, currentUser, theme = "dark" }) {
   const recent = analytics.sales.slice().sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt))).slice(0,8);
   return (
     <div className={"space-y-6 " + styles.page}>
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className={styles.panel}>
+      <section className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className={"h-auto min-w-0 flex-none " + styles.panel}>
           <p className={"text-xs font-black uppercase tracking-widest " + styles.eyebrow}>{cashier ? "Cashier workspace" : manager ? "Manager workspace" : "Owner / Admin workspace"}</p>
           <h2 className={"mt-3 text-2xl font-black sm:text-3xl " + styles.heading}>{cashier ? "Ready for your next customer" : manager ? "Keep your store moving" : "Your store at a glance"}</h2>
           <p className={"mt-2 text-sm " + styles.muted}>{cashier ? "Your sales and receipts, with quick access to scanning and checkout." : manager ? "Prioritize stock, suppliers and customer orders." : "Monitor store performance and manage your team."}</p>
@@ -60,7 +60,7 @@ export default function Dashboard({ data, currentUser, theme = "dark" }) {
             <MiniSummary label={cashier ? "Your active orders" : "Needs attention"} value={cashier ? activeOrders : pending + lowStock.length} detail={cashier ? "Created by you" : "Pending orders + stock alerts"} tone={styles.valueRose} styles={styles} />
           </div>
           <div className="mt-5 grid grid-cols-1 gap-3 min-[390px]:grid-cols-2 2xl:grid-cols-4">
-            {actions.map(([title,note,href,Icon], index) => <Link key={href} to={href} className={styles.actionCard}><Icon className="text-xl" style={{color: colors[index]}} /><strong className="mt-3 block text-sm">{title}</strong><span className={"mt-1 block text-xs " + styles.muted}>{note}</span></Link>)}
+            {actions.map(([title,note,href,Icon], index) => <Link key={href} to={href} className={"min-w-0 break-words " + styles.actionCard}><Icon className="text-xl" style={{color: colors[index]}} /><strong className="mt-3 block text-sm">{title}</strong><span className={"mt-1 block text-xs " + styles.muted}>{note}</span></Link>)}
           </div>
         </div>
         <DashboardCard title={cashier ? "Checkout essentials" : "Attention queue"} icon={FaExclamationTriangle} styles={styles}>
@@ -91,7 +91,8 @@ export default function Dashboard({ data, currentUser, theme = "dark" }) {
         </DashboardCard>
       </div>
       <DashboardCard title={cashier ? "Your recent transactions" : "Recent transactions"} icon={FaReceipt} styles={styles}>
-        <div className="overflow-x-auto"><table className={"w-full min-w-[620px] text-left text-sm " + styles.tableText}><thead className={styles.tableHead}><tr>{["Customer", "Product", "Payment", "Date · Kabul", "Cashier"].map(label => <th className="px-3 py-3" key={label}>{label}</th>)}</tr></thead><tbody className={styles.tableBody}>{recent.map(sale => <tr key={sale.id} className={styles.tableRow}><td className="p-3">{data.customers.find(row => row.id === sale.customerId)?.name || sale.customerName || "Walk-in customer"}</td><td className="p-3">{displayName(sale.productName)}</td><td className="p-3 font-bold">{money(sale.total)}</td><td className="p-3 whitespace-nowrap">{formatSaleDate(sale)}</td><td className="p-3">{sale.cashierName || "Unassigned legacy sale"}</td></tr>)}{!recent.length && <tr><td colSpan="5" className={"py-8 px-3 " + styles.muted}>No transactions in this period.</td></tr>}</tbody></table></div>
+        <p id="dashboard-transactions-scroll-hint" className={"mb-3 text-xs sm:hidden " + styles.muted}>Scroll sideways to view every column.</p>
+        <div role="region" aria-label="Scrollable transactions table" aria-describedby="dashboard-transactions-scroll-hint" tabIndex={0} className="overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-400"><table className={"w-full min-w-[620px] text-left text-sm " + styles.tableText}><thead className={styles.tableHead}><tr>{["Customer", "Product", "Payment", "Date · Kabul", "Cashier"].map(label => <th className="px-3 py-3" key={label}>{label}</th>)}</tr></thead><tbody className={styles.tableBody}>{recent.map(sale => <tr key={sale.id} className={styles.tableRow}><td className="p-3">{data.customers.find(row => row.id === sale.customerId)?.name || sale.customerName || "Walk-in customer"}</td><td className="p-3">{displayName(sale.productName)}</td><td className="p-3 font-bold">{money(sale.total)}</td><td className="p-3 whitespace-nowrap">{formatSaleDate(sale)}</td><td className="p-3">{sale.cashierName || "Unassigned legacy sale"}</td></tr>)}{!recent.length && <tr><td colSpan="5" className={"py-8 px-3 " + styles.muted}>No transactions in this period.</td></tr>}</tbody></table></div>
       </DashboardCard>
       <DashboardCard title="Top selling products" icon={FaBoxOpen} styles={styles}>
         <p className={"mb-3 text-xs " + styles.muted}>Units sold before returns · selected period</p>
@@ -103,7 +104,7 @@ export default function Dashboard({ data, currentUser, theme = "dark" }) {
 
 function DashboardCard({ title, icon: Icon, action, children, styles }) {
   return (
-    <section className={styles.card}>
+    <section className={"h-auto min-w-0 flex-none " + styles.card}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {Icon && <Icon className={styles.cardIcon} />}
